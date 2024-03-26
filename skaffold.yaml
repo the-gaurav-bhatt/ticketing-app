@@ -1,0 +1,56 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: Ticketing
+manifests:
+  rawYaml:
+    - ./infra/k8s/*
+build:
+  # local:
+  #   push: false
+  googleCloudBuild:
+    projectId: banded-hexagon-408405
+  artifacts:
+    - image: asia-south1-docker.pkg.dev/banded-hexagon-408405/gauri65/auth
+      context: auth
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: "."
+    - image: asia-south1-docker.pkg.dev/banded-hexagon-408405/gauri65/client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "app/**/*.tsx"
+            dest: "."
+# apiVersion: skaffold/v4beta1
+# kind: Config
+# metadata:
+#   name: Ticketing
+# manifests:
+#   rawYaml:
+#     - ./infra/k8s/*
+# build:
+#   local:
+#     push: false
+#   artifacts:
+#     - image: gauri65/auth
+#       context: auth
+#       docker:
+#         dockerfile: Dockerfile
+#       sync:
+#         manual:
+#           - src: "src/**/*.ts"
+#             dest: "."
+#     - image: gauri65/ticketingclient
+#       context: client
+#       docker:
+#         dockerfile: Dockerfile
+#       sync:
+#         manual:
+#           - src: "app/**/*.tsx"
+#             dest: "."
