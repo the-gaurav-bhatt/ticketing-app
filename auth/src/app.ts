@@ -3,7 +3,7 @@ import { currentUserRouter } from "./routes/current-user";
 import { signoutRouter } from "./routes/signout";
 import { signinRouter } from "./routes/signin";
 import signupRouter from "./routes/signup";
-import { errorHandler } from "./middlewares/error-middleware";
+import { errorHandler } from "@gb65/commons";
 import cookieSessi from "cookie-session";
 
 import express from "express";

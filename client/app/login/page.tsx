@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 import axios, { AxiosResponse } from "axios";
+import { ToastContainer, toast } from "react-toastify"; // Import toast components
 
 // Interfaces for type safety
 interface LoginCredentials {
@@ -17,29 +18,37 @@ interface LoginResponse {
 }
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [signin, setSignin] = useState<LoginCredentials>({
+    email: "",
+    password: "",
+  });
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignin({ ...signin, [name]: value });
+  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(""); // Clear any previous errors
 
     try {
-      const response: AxiosResponse = await axios.post("/api/users/signin", {
-        email,
-        password,
-      });
+      const response: AxiosResponse = await axios.post(
+        "/api/users/signin",
+        signin
+      );
 
       if (response.data.success) {
         // Handle successful login (e.g., store token, redirect to dashboard)
-        router.push("/");
+        console.log(response.data);
+        toast.success("Login successful!"); // Show success toast
       } else {
         setError(response.data.message || "An error occurred.");
+        toast.error(response.data.message || "Login failed!"); // Show error toast
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again."); // Show error toast
     }
   };
 
@@ -61,8 +70,9 @@ const LoginPage = () => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={signin.email}
+            onChange={handleChange}
           />
         </div>
         <div className="mb-6">
@@ -76,8 +86,9 @@ const LoginPage = () => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={signin.password}
+            onChange={handleChange}
           />
         </div>
         <div className="flex items-center justify-between">
@@ -97,6 +108,7 @@ const LoginPage = () => {
         {error && (
           <div className="text-red-500 text-xs italic mt-2">{error}</div>
         )}
+        <ToastContainer />
       </form>
     </div>
   );

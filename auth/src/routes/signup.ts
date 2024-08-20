@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { body, validationResult } from "express-validator";
-import { RequestValidationError } from "../errors/request-validation-error";
-import { BadRequestError } from "../errors/bad-request-error";
+import { RequestValidationError, BadRequestError } from "@gb65/commons";
 import { User } from "../models/user";
-import cookieSession from "cookie-session";
 import jwt from "jsonwebtoken";
 // boiler plate code for simple showing simple current user
 const express = require("express");
@@ -25,7 +23,7 @@ signupRouter.post(
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      throw new BadRequestError("Email already in use");
+      return next(new BadRequestError("Email already in use..."));
     }
 
     const user = User.build({ email, password });

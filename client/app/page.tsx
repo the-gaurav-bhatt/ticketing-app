@@ -1,54 +1,73 @@
 "use client";
 import axios from "axios";
 import useSWR from "swr";
-import { Suspense } from "react";
-// import Error from "next/error";
-// Define Server Action for handling cookie manipulation
-// "http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/api/users/currentuser",
-// {
-//   headers: {
-//     Host: "ticketing.dev",
-//   },
-// }
-//for client side
+import { Suspense, useState, useEffect } from "react";
+import Link from "next/link";
+
+// Define Server Action for handling cookie manipulation (if needed)
+// ...
+
+// Client-side data fetching function
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   return res.json();
-}; // async function getUserDataServerAction() {
-//   try {
-//     const res = await axios.get("/api/users/currentuser");
+};
 
-//     return res.data;
-//   } catch (err: any) {
-//     console.error("error for:", err);
-//     return {}; // Return an empty object or appropriate default value on error
-//   }
-// }
-
-type userResponse = {
+type UserResponse = {
   currentUser: {
     email: string;
     id: string;
     iat?: number;
   };
 };
-// Home component (enhanced with Server Action)
+
 export default function Home() {
-  // Fetch data using Server Action
-  const { data, error, isLoading, isValidating } = useSWR<userResponse>(
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Fetch user data using Server Action or client-side fetching
+  const { data, error, isLoading, isValidating } = useSWR<UserResponse>(
     "/api/users/currentuser",
     fetcher
   );
-  if (isLoading) {
-    return <>Loading...</>;
-  }
-  console.log(data);
-  if (data)
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <div>
-          <h1>email:{data.currentUser?.email}</h1>
-        </div>
-      </main>
-    );
+
+  useEffect(() => {
+    if (data && data.currentUser) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [data]);
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/users/signout");
+      setIsLoggedIn(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <nav className="flex justify-end w-full">
+        {isLoggedIn ? (
+          <button onClick={handleSignOut}>Sign Out</button>
+        ) : (
+          <Link href="/signin">Sign In</Link>
+        )}
+      </nav>
+
+      <div>
+        {isLoading ? (
+          <>Loading...</>
+        ) : error ? (
+          <p>Error: {error.message}</p>
+        ) : data && data.currentUser ? (
+          <h1>Welcome, {data.currentUser.email}!</h1>
+        ) : (
+          <p>Please sign in to view your profile.</p>
+        )}
+      </div>
+    </main>
+  );
 }

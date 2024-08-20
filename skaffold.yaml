@@ -27,6 +27,14 @@ build:
         manual:
           - src: "app/**/*.tsx"
             dest: "."
+    - image: asia-south1-docker.pkg.dev/banded-hexagon-408405/gauri65/ticket
+      context: tickets
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: "."
 # apiVersion: skaffold/v4beta1
 # kind: Config
 # metadata:

@@ -1,10 +1,9 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { body } from "express-validator";
 import jwt from "jsonwebtoken";
-import { validateRequest } from "../middlewares/validate-request";
+import { validateRequest, BadRequestError } from "@gb65/commons";
 import { Password } from "../services/password";
 import { User } from "../models/user";
-import { BadRequestError } from "../errors/bad-request-error";
 
 const router = express.Router();
 
@@ -15,15 +14,15 @@ router.post(
     body("password")
       .trim()
       .notEmpty()
-      .withMessage("You must supply a password"),
+      .withMessage("You must supply a password."),
   ],
   validateRequest,
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      throw new BadRequestError("Invalid credentials");
+      return next(new BadRequestError("Invalid credentials"));
     }
 
     const passwordsMatch = await Password.compare(
@@ -31,7 +30,7 @@ router.post(
       password
     );
     if (!passwordsMatch) {
-      throw new BadRequestError("Invalid Credentials");
+      return next(new BadRequestError("Password mismatch"));
     }
     console.log("log in success bro...");
     // Generate JWT

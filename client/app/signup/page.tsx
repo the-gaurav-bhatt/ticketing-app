@@ -3,11 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import useRequest from "../components/hooks/useRequest";
-import { useRouter } from "next/navigation";
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const { doRequest, error } = useRequest({
     url: "/api/users/signup",
@@ -37,9 +35,7 @@ export default function SignupPage() {
     // the thing that you want to do has to be done while trying to get currentuser
     // for the initial page load and not while signup
     const data = await doRequest();
-    if (!error) {
-      router.push("/");
-    }
+
     console.log(data);
   };
 
